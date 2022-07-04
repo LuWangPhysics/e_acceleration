@@ -1,0 +1,49 @@
+classdef numerical_method
+    properties
+        dt,dz;
+        p_array;
+        v,z;
+    end
+    methods
+        function obj=init(obj,v_0,z_0,E)
+            obj.dt=E.t(2)-E.t(1);
+            obj.z=zeros(size(E.t))';
+            obj.z(1)=z_0;
+            obj.v=zeros(size(E.t));
+
+            gamma=1/sqrt(1-v_0^2/E.c^2);
+            field_inst=real(E.field(E,obj.z(1),E.t(1)));
+            obj.v(1)=v_0-0.5*obj.dt*E.e*field_inst/E.m/gamma^3;
+         
+            obj.p_array=zeros(size(E.t));
+            % p is defined on the same mesh as v on 1+1/2,2+1/2
+            obj.p_array(1)=E.m*obj.v(1)/sqrt(1-obj.v(1)^2/E.c^2);
+        end
+        function obj=RK4(obj)
+            for k=1:4
+            end
+        end
+        function obj=Euler_z(obj,nn)
+                %z,t is defined at mesh 1,2 3...
+                %v is defined as 1+1/2, 2+1/2...
+                %use z and t to have E, B at 1,2,3,4
+                obj.z(nn)=obj.z(nn-1)+obj.v(nn-1)*obj.dt;
+ 
+        end
+        function obj=Euler_v(obj,E,nn,field_inst)
+                %update p, because it become an explicit method, if v is
+                %updated, the right hand side is a function of v too, the
+                %method becomes implicit
+               obj.p_array(nn)=obj.p_array(nn-1)-obj.dt*E.e*field_inst;
+               obj.v(nn)=obj.p_array(nn)/E.m/sqrt(1+obj.p_array(nn)^2/E.c^2/E.m^2);
+
+        end
+        
+        function obj=RK4_z(obj,nn)
+        end
+        function obj=RK4_v(obj,E,nn,field_inst)
+        end
+        
+    end
+
+end
